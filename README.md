@@ -13,11 +13,13 @@
 
 - [✨ Tính năng](#-tính-năng)
 - [📦 Yêu cầu](#-yêu-cầu)
+- [🗂️ Cấu trúc repo](#️-cấu-trúc-repo)
 - [🚀 Cài đặt](#-cài-đặt)
 - [⚙️ Cấu hình](#️-cấu-hình)
-- [📝 Định dạng dữ liệu](#-định-dạng-dữ-liệu-câu-hỏi)
+- [📝 Định dạng dữ liệu câu hỏi](#-định-dạng-dữ-liệu-câu-hỏi)
 - [🕹️ Sử dụng](#️-sử-dụng)
 - [🔄 Sơ đồ hoạt động](#-sơ-đồ-hoạt-động)
+- [🔧 Debug & Troubleshooting](#-debug--troubleshooting)
 - [❓ FAQ](#-faq)
 - [⚠️ Lưu ý](#️-lưu-ý)
 - [📜 License](#-license)
@@ -51,27 +53,45 @@
 
 ---
 
-## 🚀 Cài đặt
+## 🗂️ Cấu trúc repo
 
-### Cách 1 — Cài trực tiếp (khuyến nghị)
+```
+quizizz-autofill/
+├── Quizizz Auto-Fill v10.0-10.0.user.js   # File script chính — chỉnh sửa file này
+└── README.md                               # Tài liệu hướng dẫn
+```
 
-Nhấp vào link bên dưới, Tampermonkey sẽ tự nhận diện và hiển thị trang cài đặt:
-
-👉 **[Cài đặt script](https://github.com/anonyloveme/quizizz-autofill/raw/main/quizizz-autofill.user.js)**
-
-Sau khi nhấp link → Tampermonkey mở trang xác nhận → Nhấn **Install** là xong.
+> ⚠️ **Lưu ý:** Toàn bộ logic, cấu hình và dữ liệu câu hỏi đều nằm trong **một file script duy nhất**. Bạn chỉ cần chỉnh sửa file `.user.js` là đủ.
 
 ---
 
-### Cách 2 — Cài thủ công
+## 🚀 Cài đặt
+
+### Cách 1 — Cài thủ công (khuyến nghị)
+
+Do tên file chứa khoảng trắng, tính năng cài đặt trực tiếp qua URL có thể không hoạt động trên một số trình duyệt. Hãy cài thủ công theo các bước sau:
 
 **Bước 1:** Mở Tampermonkey Dashboard — nhấp icon Tampermonkey trên thanh công cụ trình duyệt → chọn **Dashboard**.
 
 **Bước 2:** Tạo script mới — nhấp vào dấu **"+"** góc trên bên trái của Dashboard.
 
-**Bước 3:** Dán code vào — xóa toàn bộ nội dung mặc định, sau đó copy toàn bộ nội dung file [`quizizz-autofill.user.js`](https://github.com/anonyloveme/quizizz-autofill/blob/main/quizizz-autofill.user.js) và dán vào.
+**Bước 3:** Dán code vào — xóa toàn bộ nội dung mặc định, sau đó copy toàn bộ nội dung file [`Quizizz Auto-Fill v10.0-10.0.user.js`](https://github.com/anonyloveme/quizizz-autofill/blob/main/Quizizz%20Auto-Fill%20v10.0-10.0.user.js) và dán vào.
 
-**Bước 4:** Lưu lại — nhấn **Ctrl + S** (Windows / Linux) hoặc **Cmd + S** (Mac).
+**Bước 4:** **Thay thế mảng `questions`** bằng dữ liệu câu hỏi của bạn (xem phần [Định dạng dữ liệu](#-định-dạng-dữ-liệu-câu-hỏi) bên dưới).
+
+**Bước 5:** Lưu lại — nhấn **Ctrl + S** (Windows / Linux) hoặc **Cmd + S** (Mac).
+
+---
+
+### Cách 2 — Cài trực tiếp qua URL
+
+```
+https://raw.githubusercontent.com/anonyloveme/quizizz-autofill/main/Quizizz%20Auto-Fill%20v10.0-10.0.user.js
+```
+
+Dán URL trên vào trình duyệt → Tampermonkey mở trang xác nhận → Nhấn **Install**.
+
+> ⚠️ Sau khi cài xong, bạn vẫn cần mở Tampermonkey Dashboard để **thay thế mảng `questions`** bằng dữ liệu của mình rồi lưu lại.
 
 ---
 
@@ -100,7 +120,9 @@ const RELOAD_WAIT_SEC = 20;   // Số giây chờ sau khi reload batch
 
 ## 📝 Định dạng dữ liệu câu hỏi
 
-Dán mảng câu hỏi của bạn vào phần `DATA` trong script:
+> ⚠️ **Quan trọng:** Script có sẵn một mảng `questions` mẫu. Bạn cần **xóa toàn bộ nội dung mẫu đó** và thay bằng dữ liệu câu hỏi của mình.
+
+Tìm phần `DATA` trong script và thay thế nội dung bên trong `const questions = [...]`:
 
 ```javascript
 const questions = [
@@ -198,30 +220,57 @@ answer: [1, 3]    → chọn "Đáp án B" và "Đáp án D"
           ┌──┴──┐                             │
          Có    Không                          │
           │      │                            │
-          ▼      ▼                            │
-       [Retry] [Câu tiếp theo] ──────────────►│
+          ▼      └────────────────────────────┤
+       [Retry]                                │
           │                                   │
        Hết retry?                             │
        ┌──┴──┐                               │
       Có    Không                             │
-       │      │                               │
-       ▼      ▼                               │
-    [Bỏ qua] [Thử lại] ─────────────────────►│
-    [Câu tiếp]                                │
+       │      └──────────────────────────────►│
+       ▼                                      │
+    [Bỏ qua câu] ────────────────────────────►│
              │                                │
           Hết batch?                          │
           ┌──┴──┐                             │
          Có    Không                          │
-          │      │                            │
-          ▼      └────────────────────────────┘
-       [Reload]
-    [Batch kế tiếp]
+          │      └────────────────────────────┘
+          ▼
+       [Reload trang]
+       [Chạy batch kế tiếp]
           │
        Hết tất cả?
           │
           ▼
        ✅ Hoàn thành!
 ```
+
+---
+
+## 🔧 Debug & Troubleshooting
+
+### Xem log trong Console
+
+Mở **DevTools** (F12) → tab **Console** để xem log realtime của script. Tất cả log đều có prefix `[QAF]`.
+
+### Checkpoint localStorage
+
+Script lưu tiến trình vào `localStorage` với key **`qaf_checkpoint`**. Nếu cần xóa thủ công (ví dụ khi checkpoint bị hỏng), mở Console và chạy:
+
+```javascript
+localStorage.removeItem('qaf_checkpoint');
+```
+
+Hoặc nhấn nút **RESET** trên panel để script tự xóa.
+
+### Kiểm tra script có đang chạy không
+
+Mở Console và kiểm tra dòng log:
+
+```
+[AntiDebugger] ✅ OK
+```
+
+Nếu thấy dòng này tức script đã được load thành công.
 
 ---
 
@@ -237,13 +286,16 @@ Kiểm tra lại mảng `questions` trong script, đảm bảo `answer` là inde
 Kiểm tra 3 điều: Tampermonkey đã được bật, script đang ở trạng thái **Enabled** trong Dashboard, và URL trang đang mở khớp với `@match` trong header script.
 
 **Q: Làm sao tiếp tục sau khi tắt máy?**
-Checkpoint được lưu tự động vào `localStorage` sau mỗi câu. Khi mở lại trang, script tự đọc checkpoint và đếm ngược rồi chạy tiếp — không cần làm gì thêm.
+Checkpoint được lưu tự động vào `localStorage` với key `qaf_checkpoint` sau mỗi câu. Khi mở lại trang, script tự đọc checkpoint và đếm ngược rồi chạy tiếp — không cần làm gì thêm.
 
 **Q: Có thể thay đổi `BATCH_SIZE` trong khi đang chạy không?**
 Không được. Cần nhấn **STOP**, sửa giá trị `BATCH_SIZE` trong Tampermonkey Dashboard, lưu lại, sau đó nhấn **GO** với số câu muốn tiếp tục.
 
 **Q: Script chạy đến đâu thì reload trang?**
 Sau mỗi `BATCH_SIZE` câu, script tự reload. Ví dụ với `BATCH_SIZE = 5`: batch 1 xử lý câu 1–5 rồi reload, batch 2 xử lý câu 6–10 rồi reload, và cứ tiếp tục như vậy cho đến hết.
+
+**Q: Tính năng tự động cập nhật script có hoạt động không?**
+Hiện tại chưa hoạt động do `@updateURL` và `@downloadURL` trong script trỏ đến tên file cũ. Hãy kiểm tra repo theo định kỳ để cập nhật thủ công khi có phiên bản mới.
 
 ---
 
